@@ -1,0 +1,48 @@
+service: sls
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: prod
+  region: eu-west-1
+  memory: 128
+  timeout: 2
+  logRetentionInDays: 1
+# you can add statements to the Lambda function's IAM Role here
+#  iamRoleStatements:
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:ListBucket"
+#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
+#    - Effect: "Allow"
+#      Action:
+#        - "s3:PutObject"
+#      Resource:
+#        Fn::Join:
+#          - ""
+#          - - "arn:aws:s3:::"
+#            - "Ref" : "ServerlessDeploymentBucket"
+#            - "/*"
+
+# you can define service wide environment variables here
+#  environment:
+#    variable1: value1
+
+# you can add packaging information here
+package:
+  include:
+    - handler.js
+    - node_modules/**
+    - notion/**
+    - slackbot/**
+
+functions:
+  suggestions:
+    handler: handler.suggestion
+    events:
+      - http:
+          path: suggestion
+          method: post
+    environment:
+      NOTION_KEY: ${ssm:/notion-bettabot-key~true}
+      NOTION_SUGGESTIONS_DB_ID: ${ssm:/notion-bettabot-suggestions-db~true}
